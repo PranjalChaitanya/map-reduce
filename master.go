@@ -6,7 +6,8 @@ import (
 	"net/rpc"
 )
 
-func (m *MasterServer) Init(empty struct{}, reply *Task) error {
+func (m *MasterServer) Init() error {
+	fmt.Println("INIT IS CALLED")
 	m.TaskQueue = TaskQueue{}
 	a := Task{0, 0, 1, "tunu.txt"}
 	b := Task{0, 0, 1, "hello.txt"}
@@ -34,8 +35,9 @@ func (m *MasterServer) ProvideTask(empty struct{}, reply *Task) error {
 }
 
 func (m *MasterServer) Server() {
-	var masterServer = new(MasterServer)
-	rpc.Register(masterServer)
+	//var masterServer = new(MasterServer)
+	m.Init()
+	rpc.Register(m)
 	rpc.HandleHTTP()
 	http.ListenAndServe(":8080", nil)
 }
