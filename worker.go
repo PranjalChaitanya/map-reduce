@@ -9,32 +9,12 @@ import (
 	"time"
 )
 
-//func call(rpcname string, args interface{}, reply interface{}) bool {
-//	c, err := rpc.DialHTTP("tcp", "127.0.0.1:8080")
-//	if err != nil {
-//		log.Fatal("dialing:", err)
-//	}
-//	defer c.Close()
-//
-//	err = c.Call(rpcname, args, reply)
-//	if err != nil {
-//		return true
-//	}
-//
-//	fmt.Println(err)
-//	return false
-//}
-
 func (w *WorkerServer) ExecuteTask(task Task) {
 	fmt.Println("Printing inside execute task")
 	w.WorkerStatus = EXECUTING
 
 	if task.Type == Map {
 		go w.MapFileWordCount(task.File)
-	}
-
-	for w.WorkerStatus == EXECUTING {
-		time.Sleep(2 * time.Second)
 	}
 }
 
@@ -44,10 +24,14 @@ func (w *WorkerServer) MapFileWordCount(key string) {
 		log.Fatal(err)
 	}
 
-	file, err := os.Create("intermediate.txt")
+	file, err := os.OpenFile("intermediate.txt", os.O_APPEND|os.O_WRONLY, 0600)
 	defer file.Close()
 	if err != nil {
-		log.Fatal(err)
+		file, err = os.Create("intermediate.txt")
+		defer file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	words := strings.Split(string(value), " ")
@@ -58,7 +42,7 @@ func (w *WorkerServer) MapFileWordCount(key string) {
 	w.WorkerStatus = IDLE
 }
 
-func (w *WorkerServer) RequestTask() {
+func (w *WorkerServer) RequestTask() Task {
 	fmt.Println("TASK IS BEING REQUESTED")
 	client, err := rpc.DialHTTP("tcp", "127.0.0.1:8080")
 	defer client.Close()
@@ -73,8 +57,15 @@ func (w *WorkerServer) RequestTask() {
 	fmt.Println("COMPLETED CALL ABOUT TO RUN THE ROUTINE")
 
 	w.ExecuteTask(reply)
+	return reply
 }
 
-func Server() {
-
+func (w *WorkerServer) Server() {
+	w.WorkerStatus = IDLE
+	for {
+		if w.WorkerStatus == IDLE {
+			w.RequestTask()
+		}
+		time.Sleep(time.Second * 2)
+	}
 }
