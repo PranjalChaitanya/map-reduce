@@ -115,6 +115,30 @@ func (ct *CleanerThread) StartCleanerThread(buffer *CircularBuffer, id int) {
 }
 
 func (ct *CleanerThread) FlushRemainingBuffer(buffer *CircularBuffer) {
+	tmp := ""
+	dsd := []string{}
+
 	for i := buffer.CurrentCleanPoint; i < buffer.CurrentPoint; i++ {
+		if buffer.BufferArray[i%buffer.TotalSize] == " " {
+			dsd = append(dsd, tmp)
+			tmp = ""
+			continue
+		}
+		tmp += string(buffer.BufferArray[i%buffer.TotalSize])
+	}
+
+	sorted := MergeSort(dsd)
+	combined := Combiner(sorted)
+
+	for _, pair := range combined {
+		if (len(pair[0])) > 0 {
+			file, err := os.OpenFile("intermediate.txt", os.O_APPEND|os.O_WRONLY, 0600)
+			defer file.Close()
+			if err != nil {
+
+			}
+			num, err := strconv.Atoi(pair[1])
+			fmt.Fprintf(file, "%s, %d\n", pair[0], num)
+		}
 	}
 }

@@ -19,14 +19,20 @@ type CircularBuffer struct {
 	SizeAvailable     int
 	CurrentPoint      int
 	CurrentCleanPoint int
-	BufferArray       [72]string
+	BufferArray       [77]string
 	CurrentlyCleaning bool
 	ThreadCleaner     [1]int
 }
 
 func (c *CircularBuffer) Add(value string) {
-	if len(value) > c.SizeAvailable && c.CurrentlyCleaning == false {
-		c.SizeAvailable = c.TotalSize - (c.CurrentPoint - c.CurrentCleanPoint)
+	c.SizeAvailable = c.TotalSize - (c.CurrentPoint - c.CurrentCleanPoint)
+	if c.CurrentPoint == 77 {
+		fmt.Println("77 PRINT STATS")
+		fmt.Println(len(value))
+		fmt.Println(c.SizeAvailable)
+		fmt.Println(c.CurrentlyCleaning)
+	}
+	if (len(value)+1) > c.SizeAvailable && c.CurrentlyCleaning == false {
 		fmt.Println("PERFORMING FULL CLEAN")
 		fmt.Println(c.CurrentCleanPoint)
 		fmt.Println(c.CurrentPoint)
@@ -34,6 +40,7 @@ func (c *CircularBuffer) Add(value string) {
 		go c.Clean()
 		for len(value) >= c.SizeAvailable {
 			// Infinite loop till the go routine cleans up
+			c.SizeAvailable = c.TotalSize - (c.CurrentPoint - c.CurrentCleanPoint)
 		}
 	}
 
@@ -100,16 +107,18 @@ func (c *CircularBuffer) CallCompletionThreadClean(id int, end int) {
 }
 
 func (c *CircularBuffer) FlushRemainingBuffer() {
-	fmt.Println(c.CurrentCleanPoint)
-	fmt.Println(c.CurrentPoint)
-	fmt.Println(c.SizeAvailable)
-	fmt.Println("Flushing remaining buffer")
-	tmp := ""
-
-	for i := c.CurrentCleanPoint; i < c.CurrentPoint; i++ {
-		if c.BufferArray[i*c.TotalSize] == " " {
-
-		}
-		tmp += string(c.BufferArray[i*c.TotalSize])
-	}
+	//fmt.Println(c.CurrentCleanPoint)
+	//fmt.Println(c.CurrentPoint)
+	//fmt.Println(c.SizeAvailable)
+	//fmt.Println("Flushing remaining buffer")
+	//tmp := ""
+	//
+	//for i := c.CurrentCleanPoint; i < c.CurrentPoint; i++ {
+	//	if c.BufferArray[i%c.TotalSize] == " " {
+	//
+	//	}
+	//	tmp += string(c.BufferArray[i*c.TotalSize])
+	//}
+	cleaner1 := CleanerThread{c.CurrentCleanPoint, int(0.8 * float64(c.CurrentPoint-c.CurrentCleanPoint)), make([]string, 12)}
+	cleaner1.FlushRemainingBuffer(c)
 }

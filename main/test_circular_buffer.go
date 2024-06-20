@@ -35,11 +35,11 @@ func Combiner(filename string) [][2]string {
 
 func main() {
 	buffer := &MapReduce.CircularBuffer{
-		TotalSize:         72,
-		SizeAvailable:     72,
+		TotalSize:         77,
+		SizeAvailable:     77,
 		CurrentPoint:      0,
 		CurrentCleanPoint: 0,
-		BufferArray:       [72]string(make([]string, 72)),
+		BufferArray:       [77]string(make([]string, 77)),
 		CurrentlyCleaning: false,
 	}
 
@@ -48,6 +48,8 @@ func main() {
 		buffer.Add("World")
 	}
 
+	buffer.FlushRemainingBuffer()
+
 	time.Sleep(5 * time.Second)
 
 	combinedArr := Combiner("intermediate.txt")
@@ -55,6 +57,4 @@ func main() {
 	for _, pair := range combinedArr {
 		fmt.Printf("(%s, %s)\n", pair[0], pair[1])
 	}
-
-	buffer.FlushRemainingBuffer()
 }
