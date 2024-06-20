@@ -1,35 +1,28 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"strconv"
-)
-
-func Combiner(filename string) [][2]string {
-	file, err := os.Open(filename)
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return nil
-	}
-	defer file.Close()
-
-	var result [][2]string
-	counts := make(map[string]int)
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		counts[line]++
-	}
-
-	for line, count := range counts {
-		result = append(result, [2]string{line, strconv.Itoa(count)})
-	}
-
-	return result
-}
+//func Combiner(filename string) [][2]string {
+//	file, err := os.Open(filename)
+//	if err != nil {
+//		fmt.Println("Error opening file:", err)
+//		return nil
+//	}
+//	defer file.Close()
+//
+//	var result [][2]string
+//	counts := make(map[string]int)
+//
+//	scanner := bufio.NewScanner(file)
+//	for scanner.Scan() {
+//		line := scanner.Text()
+//		counts[line]++
+//	}
+//
+//	for line, count := range counts {
+//		result = append(result, [2]string{line, strconv.Itoa(count)})
+//	}
+//
+//	return result
+//}
 
 //func main() {
 //	// Call Combiner function

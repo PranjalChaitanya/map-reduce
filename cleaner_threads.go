@@ -67,14 +67,16 @@ func Combiner(arr []string) [][2]string {
 }
 
 func (ct *CleanerThread) StartCleanerThread(buffer *CircularBuffer, id int) {
-	for {
-		ct.AmountToClean -= 1
-		if buffer.BufferArray[ct.StartingPoint%buffer.TotalSize] == " " {
-			ct.StartingPoint += 1
-			break
-		}
-		ct.StartingPoint += 1
-	}
+	fmt.Println(buffer)
+	ct.StartingPoint = buffer.CurrentCleanPoint
+	//for {
+	//	ct.AmountToClean -= 1
+	//	if buffer.BufferArray[ct.StartingPoint%buffer.TotalSize] == " " {
+	//		ct.StartingPoint += 1
+	//		break
+	//	}
+	//	ct.StartingPoint += 1
+	//}
 
 	tmp := ""
 	for {
@@ -96,6 +98,7 @@ func (ct *CleanerThread) StartCleanerThread(buffer *CircularBuffer, id int) {
 	}
 
 	sorted := MergeSort(ct.CurrentBuffer)
+	fmt.Println(sorted)
 	combined := Combiner(sorted)
 
 	for _, pair := range combined {
@@ -108,5 +111,10 @@ func (ct *CleanerThread) StartCleanerThread(buffer *CircularBuffer, id int) {
 			num, err := strconv.Atoi(pair[1])
 			fmt.Fprintf(file, "%s, %d\n", pair[0], num)
 		}
+	}
+}
+
+func (ct *CleanerThread) FlushRemainingBuffer(buffer *CircularBuffer) {
+	for i := buffer.CurrentCleanPoint; i < buffer.CurrentPoint; i++ {
 	}
 }

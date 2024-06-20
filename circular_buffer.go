@@ -26,18 +26,22 @@ type CircularBuffer struct {
 
 func (c *CircularBuffer) Add(value string) {
 	if len(value) > c.SizeAvailable && c.CurrentlyCleaning == false {
+		c.SizeAvailable = c.TotalSize - (c.CurrentPoint - c.CurrentCleanPoint)
 		fmt.Println("PERFORMING FULL CLEAN")
+		fmt.Println(c.CurrentCleanPoint)
+		fmt.Println(c.CurrentPoint)
+		fmt.Println(c.SizeAvailable)
 		go c.Clean()
 		for len(value) >= c.SizeAvailable {
 			// Infinite loop till the go routine cleans up
-			fmt.Println(c.SizeAvailable)
 		}
 	}
 
-	casted := int(0.8 * float64(c.TotalSize))
-	if (c.TotalSize-c.SizeAvailable) > casted && c.CurrentlyCleaning == false {
-		go c.Clean()
-	}
+	//casted := int(0.8 * float64(c.TotalSize))
+	//if (c.TotalSize-c.SizeAvailable) > casted && c.CurrentlyCleaning == false {
+	//	fmt.Println("PERFORMING PARTIAL CLEAN")
+	//	go c.Clean()
+	//}
 
 	for _, char := range value {
 		c.BufferArray[c.CurrentPoint%c.TotalSize] = string(char)
@@ -57,7 +61,7 @@ func (c *CircularBuffer) Add(value string) {
 func (c *CircularBuffer) Clean() {
 	c.CurrentlyCleaning = true
 	c.ThreadCleaner = [1]int{-1}
-	cleaner1 := CleanerThread{c.CurrentCleanPoint, 30, make([]string, 12)}
+	cleaner1 := CleanerThread{c.CurrentCleanPoint, int(0.8 * float64(c.CurrentPoint-c.CurrentCleanPoint)), make([]string, 12)}
 	//cleaner2 := CleanerThread{c.CurrentCleanPoint + 1000, 1000, make([]string, 1000)}
 	//cleaner3 := CleanerThread{c.CurrentCleanPoint + 2000, 1000, make([]string, 1000)}
 
@@ -67,21 +71,45 @@ func (c *CircularBuffer) Clean() {
 }
 
 func (c *CircularBuffer) CallCompletionThreadClean(id int, end int) {
+	fmt.Println("COMPLETION THREAD IS CALLED")
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.ThreadCleaner[id] = end
-	for i := 0; i < len(c.ThreadCleaner); i++ {
-		if c.ThreadCleaner[i] == -1 {
-			return
-		}
-		//// If the new clean point is greaetr than the current you give that much space
-		//if c.ThreadCleaner[i] > c.CurrentCleanPoint {
-		//	c.SizeAvailable += c.ThreadCleaner[i] - c.CurrentCleanPoint
-		//}
-		c.CurrentCleanPoint = end
-	}
+	//c.ThreadCleaner[id] = end
+	//for i := 0; i < len(c.ThreadCleaner); i++ {
+	//	if c.ThreadCleaner[i] == -1 {
+	//		return
+	//	}
+	//	//// If the new clean point is greaetr than the current you give that much space
+	//	//if c.ThreadCleaner[i] > c.CurrentCleanPoint {
+	//	//	c.SizeAvailable += c.ThreadCleaner[i] - c.CurrentCleanPoint
+	//	//}
+	//	c.CurrentCleanPoint = end
+	//}
 
+	fmt.Println("COMPLETION THREAD DATA")
+	fmt.Println(c.CurrentPoint)
+	fmt.Println(end)
+
+	c.CurrentCleanPoint = end
 	c.ThreadCleaner = [1]int{-1}
 	c.CurrentlyCleaning = false
-	c.SizeAvailable += c.CurrentPoint - c.CurrentCleanPoint
+	c.SizeAvailable = c.TotalSize - (c.CurrentPoint - c.CurrentCleanPoint)
+
+	fmt.Println(c.SizeAvailable)
+
+}
+
+func (c *CircularBuffer) FlushRemainingBuffer() {
+	fmt.Println(c.CurrentCleanPoint)
+	fmt.Println(c.CurrentPoint)
+	fmt.Println(c.SizeAvailable)
+	fmt.Println("Flushing remaining buffer")
+	tmp := ""
+
+	for i := c.CurrentCleanPoint; i < c.CurrentPoint; i++ {
+		if c.BufferArray[i*c.TotalSize] == " " {
+
+		}
+		tmp += string(c.BufferArray[i*c.TotalSize])
+	}
 }
