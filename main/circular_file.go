@@ -1,7 +1,6 @@
 package main
 
 import (
-	"MapReduce"
 	"bufio"
 	"fmt"
 	"os"
@@ -43,23 +42,23 @@ func Combiner(filename string) [][2]string {
 //}
 
 func main() {
-	buffer := &MapReduce.CircularBuffer{
-		TotalSize:         222256,
-		SizeAvailable:     222256,
-		CurrentPoint:      0,
-		CurrentCleanPoint: 0,
-		BufferArray:       [222256]string(make([]string, 222256)),
-		CurrentlyCleaning: false,
-	}
-
-	for i := 0; i < 490000; i++ {
-		buffer.Add("Hello")
-		buffer.Add("World")
-	}
-
-	combinedArr := Combiner("intermediate.txt")
-
-	for _, pair := range combinedArr {
-		fmt.Printf("(%s, %s)\n", pair[0], pair[1])
-	}
+	//buffer := &MapReduce.CircularBuffer{
+	//	TotalSize:         222256,
+	//	SizeAvailable:     222256,
+	//	CurrentPoint:      0,
+	//	CurrentCleanPoint: 0,
+	//	BufferArray:       [222256]string(make([]string, 222256)),
+	//	CurrentlyCleaning: false,
+	//}
+	//
+	//for i := 0; i < 490000; i++ {
+	//	buffer.Add("Hello")
+	//	buffer.Add("World")
+	//}
+	//
+	//combinedArr := Combiner("intermediate.txt")
+	//
+	//for _, pair := range combinedArr {
+	//	fmt.Printf("(%s, %s)\n", pair[0], pair[1])
+	//}
 }

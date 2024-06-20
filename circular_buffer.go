@@ -19,9 +19,9 @@ type CircularBuffer struct {
 	SizeAvailable     int
 	CurrentPoint      int
 	CurrentCleanPoint int
-	BufferArray       [222256]string
+	BufferArray       [72]string
 	CurrentlyCleaning bool
-	ThreadCleaner     [3]int
+	ThreadCleaner     [1]int
 }
 
 func (c *CircularBuffer) Add(value string) {
@@ -30,6 +30,7 @@ func (c *CircularBuffer) Add(value string) {
 		go c.Clean()
 		for len(value) >= c.SizeAvailable {
 			// Infinite loop till the go routine cleans up
+			fmt.Println(c.SizeAvailable)
 		}
 	}
 
@@ -47,7 +48,7 @@ func (c *CircularBuffer) Add(value string) {
 	}
 
 	c.BufferArray[c.CurrentPoint%c.TotalSize] = " "
-	c.CurrentPoint += len(value) + 1
+	c.CurrentPoint += 1
 	c.mu.Lock()
 	c.SizeAvailable -= 1
 	c.mu.Unlock()
@@ -55,14 +56,14 @@ func (c *CircularBuffer) Add(value string) {
 
 func (c *CircularBuffer) Clean() {
 	c.CurrentlyCleaning = true
-	c.ThreadCleaner = [3]int{-1, -1, -1}
-	cleaner1 := CleanerThread{c.CurrentCleanPoint, 1000, make([]string, 1000)}
-	cleaner2 := CleanerThread{c.CurrentCleanPoint + 1000, 1000, make([]string, 1000)}
-	cleaner3 := CleanerThread{c.CurrentCleanPoint + 2000, 1000, make([]string, 1000)}
+	c.ThreadCleaner = [1]int{-1}
+	cleaner1 := CleanerThread{c.CurrentCleanPoint, 30, make([]string, 12)}
+	//cleaner2 := CleanerThread{c.CurrentCleanPoint + 1000, 1000, make([]string, 1000)}
+	//cleaner3 := CleanerThread{c.CurrentCleanPoint + 2000, 1000, make([]string, 1000)}
 
 	go cleaner1.StartCleanerThread(c, 0)
-	go cleaner2.StartCleanerThread(c, 1)
-	go cleaner3.StartCleanerThread(c, 2)
+	//go cleaner2.StartCleanerThread(c, 1)
+	//go cleaner3.StartCleanerThread(c, 2)
 }
 
 func (c *CircularBuffer) CallCompletionThreadClean(id int, end int) {
@@ -73,13 +74,14 @@ func (c *CircularBuffer) CallCompletionThreadClean(id int, end int) {
 		if c.ThreadCleaner[i] == -1 {
 			return
 		}
-		// If the new clean point is greaetr than the current you give that much space
-		if c.ThreadCleaner[i] > c.CurrentCleanPoint {
-			c.SizeAvailable += c.ThreadCleaner[i] - c.CurrentCleanPoint
-		}
+		//// If the new clean point is greaetr than the current you give that much space
+		//if c.ThreadCleaner[i] > c.CurrentCleanPoint {
+		//	c.SizeAvailable += c.ThreadCleaner[i] - c.CurrentCleanPoint
+		//}
 		c.CurrentCleanPoint = end
 	}
 
-	c.ThreadCleaner = [3]int{-1, -1, -1}
+	c.ThreadCleaner = [1]int{-1}
 	c.CurrentlyCleaning = false
+	c.SizeAvailable += c.CurrentPoint - c.CurrentCleanPoint
 }

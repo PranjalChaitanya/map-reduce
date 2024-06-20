@@ -86,7 +86,7 @@ func (ct *CleanerThread) StartCleanerThread(buffer *CircularBuffer, id int) {
 		}
 		if ct.AmountToClean <= 0 && buffer.BufferArray[ct.StartingPoint%buffer.TotalSize] == " " {
 			if tmp != "" && tmp != " " {
-				ct.CurrentBuffer = append(ct.CurrentBuffer, buffer.BufferArray[ct.StartingPoint%buffer.TotalSize])
+				ct.CurrentBuffer = append(ct.CurrentBuffer, tmp)
 			}
 			buffer.CallCompletionThreadClean(id, ct.StartingPoint+1)
 			break
